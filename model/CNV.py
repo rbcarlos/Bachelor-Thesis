@@ -28,7 +28,7 @@ from brevitas.nn import QuantConv2d, QuantLinear
 from .utils.common import make_quant_conv2d, make_quant_linear, make_quant_relu
 
 
-CNV_OUT_CH_POOL = [(64, False), (64, True), (128, False), (128, True), (256, False), (256, False), (256, False)]
+CNV_OUT_CH_POOL = [(64, False), (64, True), (128, False), (128, True), (256, False), (256, False)]
 INTERMEDIATE_FC_FEATURES = [(256, 512), (512, 512)]
 LAST_FC_IN_FEATURES = 512
 LAST_FC_PER_OUT_CH_SCALING = False
