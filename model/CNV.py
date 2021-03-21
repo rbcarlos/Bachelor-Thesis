@@ -25,7 +25,7 @@ from torch import nn
 from torch.nn import Module, ModuleList, BatchNorm2d, MaxPool2d, BatchNorm1d
 
 from brevitas.nn import QuantConv2d, QuantLinear
-from utils.common import make_quant_conv2d, make_quant_linear, make_quant_relu
+from .utils.common import make_quant_conv2d, make_quant_linear, make_quant_relu
 
 
 CNV_OUT_CH_POOL = [(64, False), (64, True), (128, False), (128, True), (256, False), (256, False)]
