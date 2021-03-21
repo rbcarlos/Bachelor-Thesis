@@ -144,5 +144,3 @@ def cnv(weight_bit_width, act_bit_width, in_bit_width):
               num_classes=num_classes,
               in_ch=in_channels)
     return net
-
-cnv(8,8,8)
