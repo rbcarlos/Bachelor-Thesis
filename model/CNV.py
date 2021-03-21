@@ -128,8 +128,7 @@ class ConvBlock(nn.Module):
         self.bn = nn.BatchNorm2d(num_features=out_channels, eps=bn_eps)
         self.activation = make_quant_relu(bit_width=act_bit_width,
                                           per_channel_broadcastable_shape=(1, out_channels, 1, 1),
-                                          scaling_per_channel=activation_scaling_per_channel,
-                                          return_quant_tensor=True)
+                                          scaling_per_channel=activation_scaling_per_channel)
 
     def forward(self, x):
         x = self.conv(x)
