@@ -54,6 +54,8 @@ class CNV(Module):
                 )
         )
 
+        in_ch = CNV_OUT_CH_POOL[0][0]
+
         for out_ch, is_pool_enabled in CNV_OUT_CH_POOL[1:]:
             self.conv_features.append(
                 ConvBlock(
@@ -66,6 +68,7 @@ class CNV(Module):
             )
             if is_pool_enabled:
                 self.conv_features.append(MaxPool2d(kernel_size=2))
+            in_ch = out_ch
 
         for in_features, out_features in INTERMEDIATE_FC_FEATURES:
             self.linear_features.append(
