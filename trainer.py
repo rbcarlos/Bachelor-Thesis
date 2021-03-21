@@ -160,12 +160,12 @@ def main_worker(gpu, ngpus_per_node, args):
         train_sampler = None
 
     train_loader = torch.utils.data.DataLoader(trainset, batch_size=args.batch_size,
-                                            shuffle=True, num_workers=2, sampler=train_sampler)
+                                            shuffle=(train_sampler is None), num_workers=2, sampler=train_sampler, pin_memory=True)
 
     valset = datasets.CIFAR10(root='./data', train=False,
                                         download=True, transform=transform)
     val_loader = torch.utils.data.DataLoader(valset, batch_size=args.batch_size,
-                                            shuffle=False, num_workers=2)
+                                            shuffle=False, num_workers=2, pin_memory=True)
 
     if args.evaluate:
         validate(val_loader, model, criterion, args)
