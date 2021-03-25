@@ -1,113 +1,38 @@
-import brevitas.nn as qnn
+from dependencies import value
+
+from brevitas.inject import ExtendedInjector
+from brevitas.quant.solver import WeightQuantSolver, ActQuantSolver
+from brevitas.core.bit_width import BitWidthImplType
 from brevitas.core.quant import QuantType
-from brevitas.core.restrict_val import RestrictValueType
+from brevitas.core.restrict_val import RestrictValueType, FloatToIntImplType
 from brevitas.core.scaling import ScalingImplType
-from brevitas.core.stats import StatsOp
+from brevitas.core.zero_point import ZeroZeroPoint
 
 
-QUANT_TYPE = QuantType.INT
-SCALING_MIN_VAL = 2e-16
+class CommonQuant(ExtendedInjector):
+    bit_width_impl_type = BitWidthImplType.CONST
+    scaling_impl_type = ScalingImplType.CONST
+    restrict_scaling_type = RestrictValueType.FP
+    zero_point_impl = ZeroZeroPoint
+    float_to_int_impl_type = FloatToIntImplType.ROUND
+    scaling_per_output_channel = False
+    narrow_range = True
+    signed = True
 
-ACT_SCALING_IMPL_TYPE = ScalingImplType.PARAMETER
-ACT_SCALING_PER_CHANNEL = False
-ACT_SCALING_RESTRICT_SCALING_TYPE = RestrictValueType.LOG_FP
-ACT_MAX_VAL = 6.0
-ACT_RETURN_QUANT_TENSOR = False
-ACT_PER_CHANNEL_BROADCASTABLE_SHAPE = None
-HARD_TANH_THRESHOLD = 10.0
-
-WEIGHT_SCALING_IMPL_TYPE = ScalingImplType.STATS
-WEIGHT_SCALING_PER_OUTPUT_CHANNEL = True
-WEIGHT_SCALING_STATS_OP = StatsOp.MAX
-WEIGHT_RESTRICT_SCALING_TYPE = RestrictValueType.LOG_FP
-WEIGHT_NARROW_RANGE = True
-
-ENABLE_BIAS_QUANT = False
-
-HADAMARD_FIXED_SCALE = False
+    @value
+    def quant_type(bit_width):
+        if bit_width is None:
+            return QuantType.FP
+        elif bit_width == 1:
+            return QuantType.BINARY
+        else:
+            return QuantType.INT
 
 
-def make_quant_conv2d(in_channels,
-                      out_channels,
-                      kernel_size,
-                      stride,
-                      padding,
-                      groups,
-                      bias,
-                      bit_width,
-                      enable_bias_quant=ENABLE_BIAS_QUANT,
-                      weight_quant_type=QUANT_TYPE,
-                      weight_scaling_impl_type=WEIGHT_SCALING_IMPL_TYPE,
-                      weight_scaling_stats_op=WEIGHT_SCALING_STATS_OP,
-                      weight_scaling_per_output_channel=WEIGHT_SCALING_PER_OUTPUT_CHANNEL,
-                      weight_restrict_scaling_type=WEIGHT_RESTRICT_SCALING_TYPE,
-                      weight_narrow_range=WEIGHT_NARROW_RANGE,
-                      weight_scaling_min_val=SCALING_MIN_VAL):
-    bias_quant_type = QUANT_TYPE if enable_bias_quant else QuantType.FP
-    return qnn.QuantConv2d(in_channels,
-                           out_channels,
-                           groups=groups,
-                           kernel_size=kernel_size,
-                           padding=padding,
-                           stride=stride,
-                           bias=bias,
-                           bias_quant_type=bias_quant_type,
-                           compute_output_bit_width=bias and enable_bias_quant,
-                           compute_output_scale=bias and enable_bias_quant,
-                           weight_bit_width=bit_width,
-                           weight_quant_type=weight_quant_type,
-                           weight_scaling_impl_type=weight_scaling_impl_type,
-                           weight_scaling_stats_op=weight_scaling_stats_op,
-                           weight_scaling_per_output_channel=weight_scaling_per_output_channel,
-                           weight_restrict_scaling_type=weight_restrict_scaling_type,
-                           weight_narrow_range=weight_narrow_range,
-                           weight_scaling_min_val=weight_scaling_min_val)
+class CommonWeightQuant(CommonQuant, WeightQuantSolver):
+    scaling_const = 1.0
 
 
-def make_quant_linear(in_channels,
-                      out_channels,
-                      bias,
-                      bit_width,
-                      enable_bias_quant=ENABLE_BIAS_QUANT,
-                      weight_quant_type=QUANT_TYPE,
-                      weight_scaling_impl_type=WEIGHT_SCALING_IMPL_TYPE,
-                      weight_scaling_stats_op=WEIGHT_SCALING_STATS_OP,
-                      weight_scaling_per_output_channel=WEIGHT_SCALING_PER_OUTPUT_CHANNEL,
-                      weight_restrict_scaling_type=WEIGHT_RESTRICT_SCALING_TYPE,
-                      weight_narrow_range=WEIGHT_NARROW_RANGE,
-                      weight_scaling_min_val=SCALING_MIN_VAL):
-    bias_quant_type = QUANT_TYPE if enable_bias_quant else QuantType.FP
-    return qnn.QuantLinear(in_channels, out_channels,
-                           bias=bias,
-                           bias_quant_type=bias_quant_type,
-                           compute_output_bit_width=bias and enable_bias_quant,
-                           compute_output_scale=bias and enable_bias_quant,
-                           weight_bit_width=bit_width,
-                           weight_quant_type=weight_quant_type,
-                           weight_scaling_impl_type=weight_scaling_impl_type,
-                           weight_scaling_stats_op=weight_scaling_stats_op,
-                           weight_scaling_per_output_channel=weight_scaling_per_output_channel,
-                           weight_restrict_scaling_type=weight_restrict_scaling_type,
-                           weight_narrow_range=weight_narrow_range,
-                           weight_scaling_min_val=weight_scaling_min_val)
-
-
-def make_quant_relu(bit_width,
-                    quant_type=QUANT_TYPE,
-                    scaling_impl_type=ACT_SCALING_IMPL_TYPE,
-                    scaling_per_channel=ACT_SCALING_PER_CHANNEL,
-                    restrict_scaling_type=ACT_SCALING_RESTRICT_SCALING_TYPE,
-                    scaling_min_val=SCALING_MIN_VAL,
-                    max_val=ACT_MAX_VAL,
-                    return_quant_tensor=ACT_RETURN_QUANT_TENSOR,
-                    per_channel_broadcastable_shape=ACT_PER_CHANNEL_BROADCASTABLE_SHAPE):
-    return qnn.QuantReLU(bit_width=bit_width,
-                         quant_type=quant_type,
-                         scaling_impl_type=scaling_impl_type,
-                         scaling_per_channel=scaling_per_channel,
-                         restrict_scaling_type=restrict_scaling_type,
-                         scaling_min_val=scaling_min_val,
-                         max_val=max_val,
-                         return_quant_tensor=return_quant_tensor,
-                         per_channel_broadcastable_shape=per_channel_broadcastable_shape)
-
+class CommonActQuant(CommonQuant, ActQuantSolver):
+    min_val = -1.0
+    max_val = 1.0

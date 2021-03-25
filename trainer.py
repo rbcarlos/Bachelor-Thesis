@@ -237,6 +237,8 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         loss.backward()
         optimizer.step()
 
+        model.clip_weights(-1,1)
+
         # measure elapsed time
         batch_time.update(time.time() - end)
         end = time.time()
