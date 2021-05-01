@@ -311,7 +311,7 @@ def train(epochs=5, filename="best.tar"):
             'optim_dict': optimizer.state_dict(),
             'best_val_acc': best_acc,
         }, filename)
-    return accs
+  return accs
 
 # PRUNING DEFINITIONS
 def make_weights_during_training(model_state_dict):
