@@ -217,7 +217,7 @@ model.load_state_dict(model_state_dict, strict=False)
 model = get_test_model_trained("CNV", 2, 2)
 
 import torch.optim as optim
-optimizer = optim.Adam(model.parameters(), lr=0.001)
+optimizer = optim.Adam(model.parameters(), lr=0.0001)
 device = 'cuda:0'
 criterion = nn.CrossEntropyLoss().to(device)
 
@@ -515,4 +515,4 @@ def prune_simd(increment = 0.1, start_sparsity=0.5, max_sparsity = 0.7, finetune
   return test_acc, sparsity
 
 # PRUNE
-sparsity, val_acc = prune_simd(start_sparsity=0.0, increment=0.2, max_sparsity=0.75, finetune_epochs=200)
+sparsity, val_acc = prune_simd(start_sparsity=0.0, increment=0.15, max_sparsity=0.75, finetune_epochs=100)
