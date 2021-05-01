@@ -272,6 +272,7 @@ def accuracy(output, target, topk=(1,)):
 
 def train(epochs=5, filename="best.tar"):
   best_acc = 0
+  accs = []
   for epoch in range(epochs):
     # Set to training mode
     model.to(device)
@@ -302,6 +303,7 @@ def train(epochs=5, filename="best.tar"):
       optimizer.param_groups[0]['lr'] *= 0.5
 
     val_acc = test()
+    accs.append(val_acc)
     if val_acc > best_acc:
       print(str(val_acc) + " is higher than " + str(best_acc) + ", saving")
       best_acc = val_acc
@@ -310,6 +312,7 @@ def train(epochs=5, filename="best.tar"):
             'optim_dict': optimizer.state_dict(),
             'best_val_acc': best_acc,
         }, filename)
+    return accs
 
 # PRUNING DEFINITIONS
 def make_weights_during_training(model_state_dict):
@@ -423,9 +426,9 @@ def prune_simd(increment = 0.1, start_sparsity=0.5, max_sparsity = 0.7, finetune
   i = 1
   test_acc = []
   sparsity = []
-  
+
   while True:
-    print("shape",model.conv_features[1].weight.shape)
+    #print("shape",model.conv_features[1].weight.shape)
     sparsity_before = 100. * float(
                 torch.sum(model.conv_features[1].weight == 0)
                 + torch.sum(model.conv_features[4].weight == 0)
@@ -497,9 +500,10 @@ def prune_simd(increment = 0.1, start_sparsity=0.5, max_sparsity = 0.7, finetune
     test()
     print("Finetune")
     modules = [model.conv_features[1],model.conv_features[4],model.conv_features[8],model.conv_features[11],model.conv_features[15],model.conv_features[18]]
-    print("shape before", model.conv_features[1].weight.shape)
-    train(finetune_epochs, filename)
-    print("shape after", model.conv_features[1].weight.shape)
+    #print("shape before", model.conv_features[1].weight.shape)
+    epoch_acc = train(finetune_epochs, filename)
+    print(f"Sparsity {sparsity_after}%: {epoch_acc}")
+    #print("shape after", model.conv_features[1].weight.shape)
     for j, module in enumerate(modules):
       prune.remove(module, 'weight')
     if sparsity_after > max_sparsity*100:
@@ -512,4 +516,4 @@ def prune_simd(increment = 0.1, start_sparsity=0.5, max_sparsity = 0.7, finetune
   return test_acc, sparsity
 
 # PRUNE
-sparsity, val_acc = prune_simd(start_sparsity=0.0, increment=0.1, max_sparsity=0.9, finetune_epochs=50)
+sparsity, val_acc = prune_simd(start_sparsity=0.0, increment=0.1, max_sparsity=0.9, finetune_epochs=500)
