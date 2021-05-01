@@ -1,6 +1,5 @@
 # IMPORTS
 from finn.util.basic import make_build_dir
-from finn.util.visualization import showInNetron
 import numpy as np
 from collections import OrderedDict
 
