@@ -377,6 +377,9 @@ class PruneSIMD(BasePruningMethod):
         n_SIMD_channels = n_channels // self.SIMD
         params_to_prune = n_SIMD_channels - params_to_keep
 
+        if params_to_prune == 0:
+            return default_mask
+
         t = t.permute(0, 2, 3, 1)
         
         flat_t = torch.flatten(t, start_dim=1)
