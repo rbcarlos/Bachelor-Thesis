@@ -518,4 +518,4 @@ def prune_simd(increment = 0.1, start_sparsity=0.5, max_sparsity = 0.7, finetune
   return test_acc, sparsity
 
 # PRUNE
-sparsity, val_acc = prune_simd(start_sparsity=0.0, increment=0.15, max_sparsity=0.75, finetune_epochs=100)
+sparsity, val_acc = prune_simd(start_sparsity=0.0, increment=0.15, max_sparsity=0.75, finetune_epochs=50)
