@@ -467,7 +467,7 @@ def prune_simd(increment = 0.1, start_sparsity=0.5, max_sparsity = 0.7, finetune
         (model.conv_features[18], 'weight'),
     ]
 
-    SIMD = [3,1,1,2,2,4]
+    SIMD = [9, 16, 16, 12, 6, 6]
 
     if i==1:
       amount = start_sparsity + increment
