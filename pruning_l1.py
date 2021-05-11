@@ -1,4 +1,5 @@
 # IMPORTS
+import argparse
 from finn.util.basic import make_build_dir
 import numpy as np
 from collections import OrderedDict
@@ -34,6 +35,17 @@ import torch.nn.init as init
 
 import torchvision
 import torchvision.transforms as transforms
+
+parser = argparse.ArgumentParser(description='PyTorch CIFAR10 pruning')
+parser.add_argument("--model", default="./experiments", help="Path to the pretrained model")
+parser.add_argument('--epochs', default=50, type=int, metavar='N', help='Number of finetuning epochs')
+parser.add_argument('--lr', '--learning-rate', default=0.001, type=float, metavar='LR', help='initial learning rate', dest='lr')
+parser.add_argument('--norm-order', default=1, type=int, help='Order of the vector norm')
+parser.add_argument('--simd-list', default="", type=str, help='List of SIMDs for FCLayers')
+parser.add_argument('--max-sparsity', default=0.9, type=float, help='Order of the vector norm')
+
+
+args = parser.parse_args()
 
 # DEFINITIONS
 class CommonQuant(ExtendedInjector):
@@ -373,6 +385,9 @@ class PruneSIMD(BasePruningMethod):
 
         new_shape = n_channels // self.SIMD
         params_to_keep = new_shape - int(np.round(new_shape * self.amount))
+        if params_to_keep > self.SIMD :
+            params_to_keep += self.SIMD
+            params_to_keep -= params_to_keep % self.SIMD
         
         n_SIMD_channels = n_channels // self.SIMD
         params_to_prune = n_SIMD_channels - params_to_keep
@@ -447,7 +462,7 @@ def prune_simd(increment = 0.1, start_sparsity=0.5, max_sparsity = 0.7, finetune
                 + model.conv_features[18].weight.nelement()
             )
     print("Global sparsity before pruning: {:.2f}%".format(sparsity_before))
-    filename = "best_2bit_" + str(int(sparsity_before)) + "_pruned_structured.tar"
+    filename = "best_2bit_" + str(int(sparsity_before)) + "_pruned_" + str(args.max_sparsity) + ".tar"
 
     sparsity.append(sparsity_before)
     
@@ -470,7 +485,7 @@ def prune_simd(increment = 0.1, start_sparsity=0.5, max_sparsity = 0.7, finetune
         (model.conv_features[18], 'weight'),
     ]
 
-    SIMD = [9, 16, 16, 12, 6, 6]
+    SIMD = [int(x) for x in args.simd_list.split(",")]
 
     if i==1:
       amount = start_sparsity + increment
@@ -496,7 +511,7 @@ def prune_simd(increment = 0.1, start_sparsity=0.5, max_sparsity = 0.7, finetune
               + model.conv_features[15].weight.nelement()
               + model.conv_features[18].weight.nelement()
           )
-    filename = "best_2bit_" + str(int(sparsity_after)) + "_pruned_structured.tar"
+    filename = "best_2bit_" + str(int(sparsity_after)) + "_pruned_" + str(args.max_sparsity) + ".tar"
     print("Global sparsity after pruning: {:.2f}%".format(sparsity_after))
     print("Testing before finetuning")
     test()
@@ -518,4 +533,4 @@ def prune_simd(increment = 0.1, start_sparsity=0.5, max_sparsity = 0.7, finetune
   return test_acc, sparsity
 
 # PRUNE
-sparsity, val_acc = prune_simd(start_sparsity=0.0, increment=0.15, max_sparsity=0.75, finetune_epochs=50)
+sparsity, val_acc = prune_simd(start_sparsity=0.0, increment=0.15, max_sparsity=args.max_sparsity, finetune_epochs=50)
