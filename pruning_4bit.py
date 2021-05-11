@@ -342,6 +342,7 @@ def make_weights_during_training(model_state_dict):
 
 from torch.nn.utils.prune import BasePruningMethod
 from torch.nn.utils.prune import _validate_pruning_amount_init, _validate_structured_pruning
+
 class PruneSIMD(BasePruningMethod):
     r"""Prune entire (currently unpruned) channels in a tensor at random.
     Args:
@@ -390,6 +391,9 @@ class PruneSIMD(BasePruningMethod):
         
         n_SIMD_channels = n_channels // self.SIMD
         params_to_prune = n_SIMD_channels - params_to_keep
+
+        if params_to_prune == 0:
+            return default_mask
 
         t = t.permute(0, 2, 3, 1)
         
