@@ -11,7 +11,7 @@ Neil Kim Nielsen (neni@itu.dk), Robert Bayer (roba@itu.dk)
 ### Synthesis and deployment
 - Linux
 - Vivado 2019.1 or 2020.1
-- FINN (from https://github.com/rbcarlos/finn)
+- FINN (from https://github.com/rbcarlos/finn) - part of the contributions of our thesis
 - 32 GB of RAM
 - XILINX ZYNQ-Z1 or Ultra96 (for deployment only)
 
