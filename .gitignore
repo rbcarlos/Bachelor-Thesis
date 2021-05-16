@@ -127,3 +127,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+folding/estimate_set_folding_exhaustive_no_pruning_85_budget_prio_simd_2bit_nonpruned/

@@ -1,0 +1,19 @@
+{
+  "ConvolutionInputGenerator_0": 8196,
+  "StreamingFCLayer_Batch_0": 14400,
+  "ConvolutionInputGenerator_1": 14292,
+  "StreamingFCLayer_Batch_1": 12544,
+  "StreamingMaxPool_Batch_0": 1176,
+  "ConvolutionInputGenerator_2": 10704,
+  "StreamingFCLayer_Batch_2": 9216,
+  "ConvolutionInputGenerator_3": 7488,
+  "StreamingFCLayer_Batch_3": 12800,
+  "StreamingMaxPool_Batch_1": 150,
+  "ConvolutionInputGenerator_4": 12288,
+  "StreamingFCLayer_Batch_4": 9216,
+  "ConvolutionInputGenerator_5": 4608,
+  "StreamingFCLayer_Batch_5": 12288,
+  "StreamingFCLayer_Batch_6": 8192,
+  "StreamingFCLayer_Batch_7": 8192,
+  "StreamingFCLayer_Batch_8": 5120
+}

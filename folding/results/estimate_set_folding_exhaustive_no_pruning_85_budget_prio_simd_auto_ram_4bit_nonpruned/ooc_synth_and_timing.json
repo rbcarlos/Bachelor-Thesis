@@ -1,0 +1,11 @@
+{
+  "vivado_proj_folder": "/tmp/finn_dev_neni/synth_out_of_context_76o0gr23/results_finn_design_wrapper",
+  "LUT": 46008.0,
+  "FF": 61292.0,
+  "DSP": 0.0,
+  "BRAM": 232.0,
+  "WNS": 1.905,
+  "": 0,
+  "fmax_mhz": 123.53304508956145,
+  "estimated_throughput_fps": 547.109929003514
+}
