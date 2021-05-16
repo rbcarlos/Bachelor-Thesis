@@ -24,6 +24,16 @@ This script supports multi-gpu training.
 To see the options for the script, run ```python3 trainer.py -h```
 
 ## Automatic tuning of folding factors
+The `set_folding_exhaustive` notebook contains all the code necessary to generate the folding factors for a CNV model, composed of only convolutional and fully-connected layers. 
+
+The high-level steps needed to generate the folding factors are as follows:
+- Run an arbitrary `DataFlowBuild` on a network with fold 1, i.e. all folding set to 1, where possible. Make sure at least one of the steps creates an intermediate representation of the network where the layers have been turned into `ConvolutionInputGenerator` and `StreamingFCLayer` nodes.
+- In the **main body of algorithm** cell, update pruning-ratio, target device LUTs, LUT downscaling ratio.
+- Add path to the intermediate representation of the network with the two types of nodes in the main body cell.
+- Run through the next couple of cells, primitive logging is done during optimization for debugging.
+- Lastly, `plot_cycles_remainder()` allows for visual inspection of network layout, `get_res()` returns the folding factorsr.
+
+Tip: to look at internals of folding configurations being considered for a node in conjuction with the logging, one can easily do: `node_folding_attrs = new_all_attrs.get("StreamingFCLayer_Batch_1").get("possible_attrs")` and then `sorted(node_folding_attrs.items(), key = lambda k_v: (k_v[1].get('Cycles'), k_v[0][0]), reverse = True)` to show the possible folding factors being run through.
 
 ## Pruning
 To prune a network run one of these scripts (examples):
