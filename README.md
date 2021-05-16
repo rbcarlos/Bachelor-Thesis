@@ -1,4 +1,4 @@
-# Optimizing Neural Networks on PYNQ
+# Optimizing Neural Networks for PYNQ
 Neil Kim Nielsen (neni@itu.dk), Robert Bayer (roba@itu.dk)
 
 ## Requirements
