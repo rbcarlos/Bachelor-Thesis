@@ -28,13 +28,16 @@ To see the options for the script, run ```python3 trainer.py -h```
 ## Pruning
 To prune a network run one of these scripts (examples):
 - pruning_2bit.py for pruning of 2-bit network, example:
-
-```BREVITAS_JIT=1 python3 pruning_l1.py --max-sparsity 0.9 --simd-list "9, 16, 16, 12, 8, 6"```
+```
+BREVITAS_JIT=1 python3 pruning_l1.py --max-sparsity 0.9 --simd-list "9, 16, 16, 12, 8, 6"
+```
 - pruning_4bit.py for pruning of 4-bit network, example:
-
-```BREVITAS_JIT=1 python3 pruning_4bit.py --max-sparsity 0.9 --simd-list "9, 8, 6, 9, 3, 4" --model model/cnv_q4_20210325_112610/checkpoints/model_best.pth.tar``` 
+```
+BREVITAS_JIT=1 python3 pruning_4bit.py --max-sparsity 0.9 --simd-list "9, 8, 6, 9, 3, 4" --model model/cnv_q4_20210325_112610/checkpoints/model_best.pth.tar
+``` 
 - pruning_8bit.py for pruning of 8-bit network, example:
-
-```BREVITAS_JIT=1 python3 pruning_8bit.py --max-sparsity 0.9 --simd-list "9, 8, 6, 9, 3, 4" --model model/cnv_q8_20210325_112253/checkpoints/model_best.pth.tar```
+```
+BREVITAS_JIT=1 python3 pruning_8bit.py --max-sparsity 0.9 --simd-list "9, 8, 6, 9, 3, 4" --model model/cnv_q8_20210325_112253/checkpoints/model_best.pth.tar
+```
 ___
 To see the specific options, run ```python3 pruning_2bit.py -h```
