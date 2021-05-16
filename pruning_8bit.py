@@ -41,6 +41,8 @@ parser.add_argument("--model", default="./experiments", help="Path to the pretra
 parser.add_argument('--epochs', default=50, type=int, metavar='N', help='Number of finetuning epochs')
 parser.add_argument('--lr', '--learning-rate', default=0.001, type=float, metavar='LR', help='initial learning rate', dest='lr')
 parser.add_argument('--norm-order', default=1, type=int, help='Order of the vector norm')
+parser.add_argument('--simd-list', default="", type=str, help='List of SIMDs for FCLayers')
+parser.add_argument('--max-sparsity', default=0.9, type=float, help='Order of the vector norm')
 
 args = parser.parse_args()
 
@@ -377,19 +379,26 @@ class PruneSIMD(BasePruningMethod):
         
         n_channels = torch.flatten(t, start_dim=1).shape[1]
 
-        if not (n_channels % self.SIMD == 0):
-            raise ValueError(f"n_channels={n_channels} must be divisible by SIMD={self.SIMD}")
-
+                # calculate the number of blocks left after pruning, while adhering to constraints
         new_shape = n_channels // self.SIMD
         params_to_keep = new_shape - int(np.round(new_shape * self.amount))
+        if params_to_keep > self.SIMD :
+            params_to_keep += self.SIMD
+            params_to_keep -= params_to_keep % self.SIMD
         
         n_SIMD_channels = n_channels // self.SIMD
         params_to_prune = n_SIMD_channels - params_to_keep
 
+        # if there are no parameters to prune, return the default mask
+        if params_to_prune == 0:
+            return default_mask
+
+        # permute to change to the NHWC format
         t = t.permute(0, 2, 3, 1)
         
         flat_t = torch.flatten(t, start_dim=1)
         
+        # calculate the norms of the blocks
         norms_of_blocks = []
         for i in range(n_SIMD_channels):
             block = flat_t[:, i*self.SIMD : i*self.SIMD + self.SIMD]
@@ -399,6 +408,7 @@ class PruneSIMD(BasePruningMethod):
         norms_of_blocks = torch.tensor(norms_of_blocks)
         threshold = torch.kthvalue(norms_of_blocks, k=params_to_prune).values
         
+        # create the new mask and change the pruned parameters to 0
         mask = torch.zeros_like(t)
         mask_flat = torch.flatten(mask, start_dim=1)
         for i in range(n_SIMD_channels):
@@ -453,7 +463,7 @@ def prune_simd(increment = 0.1, start_sparsity=0.5, max_sparsity = 0.7, finetune
                 + model.conv_features[18].weight.nelement()
             )
     print("Global sparsity before pruning: {:.2f}%".format(sparsity_before))
-    filename = "best_8bit_" + str(int(sparsity_before)) + "_pruned_structured.tar"
+    filename = "best_8bit_" + str(int(sparsity_before)) + "_pruned_" + str(args.max_sparsity) + ".tar"
 
     sparsity.append(sparsity_before)
     
@@ -502,7 +512,7 @@ def prune_simd(increment = 0.1, start_sparsity=0.5, max_sparsity = 0.7, finetune
               + model.conv_features[15].weight.nelement()
               + model.conv_features[18].weight.nelement()
           )
-    filename = "best_8bit_" + str(int(sparsity_after)) + "_pruned_structured.tar"
+    filename = "best_8bit_" + str(int(sparsity_after)) + "_pruned_" + str(args.max_sparsity) + ".tar"
     print("Global sparsity after pruning: {:.2f}%".format(sparsity_after))
     print("Testing before finetuning")
     test()
@@ -524,4 +534,4 @@ def prune_simd(increment = 0.1, start_sparsity=0.5, max_sparsity = 0.7, finetune
   return test_acc, sparsity
 
 # PRUNE
-sparsity, val_acc = prune_simd(start_sparsity=0.0, increment=0.15, max_sparsity=0.75, finetune_epochs=args.epochs)
+sparsity, val_acc = prune_simd(start_sparsity=0.0, increment=0.15, max_sparsity=args.max_sparsity, finetune_epochs=args.epochs)

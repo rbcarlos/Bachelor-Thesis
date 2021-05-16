@@ -380,9 +380,7 @@ class PruneSIMD(BasePruningMethod):
         
         n_channels = torch.flatten(t, start_dim=1).shape[1]
 
-        if not (n_channels % self.SIMD == 0):
-            raise ValueError(f"n_channels={n_channels} must be divisible by SIMD={self.SIMD}")
-
+        # calculate the number of blocks left after pruning, while adhering to constraints
         new_shape = n_channels // self.SIMD
         params_to_keep = new_shape - int(np.round(new_shape * self.amount))
         if params_to_keep > self.SIMD :
@@ -392,13 +390,16 @@ class PruneSIMD(BasePruningMethod):
         n_SIMD_channels = n_channels // self.SIMD
         params_to_prune = n_SIMD_channels - params_to_keep
 
+        # if there are no parameters to prune, return the default mask
         if params_to_prune == 0:
             return default_mask
 
+        # permute to change to the NHWC format
         t = t.permute(0, 2, 3, 1)
         
         flat_t = torch.flatten(t, start_dim=1)
         
+        # calculate the norms of the blocks
         norms_of_blocks = []
         for i in range(n_SIMD_channels):
             block = flat_t[:, i*self.SIMD : i*self.SIMD + self.SIMD]
@@ -408,6 +409,7 @@ class PruneSIMD(BasePruningMethod):
         norms_of_blocks = torch.tensor(norms_of_blocks)
         threshold = torch.kthvalue(norms_of_blocks, k=params_to_prune).values
         
+        # create the new mask and change the pruned parameters to 0
         mask = torch.zeros_like(t)
         mask_flat = torch.flatten(mask, start_dim=1)
         for i in range(n_SIMD_channels):
