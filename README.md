@@ -51,3 +51,6 @@ BREVITAS_JIT=1 python3 pruning_8bit.py --max-sparsity 0.9 --simd-list "9, 8, 6, 
 ```
 ___
 To see the specific options, run ```python3 pruning_2bit.py -h```
+___
+To extract the pruning masks from the model run the extract_masks.ipynb Jupyter notebook.  
+To synthesize these networks we provide a sample notebook (build_for_pynq.ipynb) containing code to run the build for both unpruned and pruned networks.
